@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chart Weight</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.2/chart.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+	<script>
+		var json;
+		var myChart;
+		var urlAjax = "./ChartDataManager";
+		function addData(label, data) {
+      var labelsData = myChart.data.labels;
+      var dataArray = myChart.data.datasets[0].data;
+			var length = label.length;
+			for(x=0; x<length; x++){
+				labelsData.push(label[x]);
+				dataArray.push(data[0].data[x]);
+			}
+			myChart.update();
+		}
+
+		function removeData() {
+			var labelsData = myChart.data.labels;
+      var dataArray = myChart.data.datasets[0].data;
+			var longitud = arrayDeDatos.length;
+			for (i=0;i<longitud;i++)
+			{
+				labelsData.pop();
+				dataArray.pop();
+			}
+			myChart.update();
+		}
+		function showGraph(){ 
+			var canvas = document.getElementById("chart");
+			if (myChart)
+			{
+				removeData();
+				var parsedJson = JSON.parse(jsonData);
+				addData(parsedJson.labels, parsedJson.datasets);
+			}
+			else{
+				myChart = new Chart(canvas,{
+					type: 'line',
+					data: JSON.parse(jsonData),
+					options: {
+						title: {
+							display: true,
+							text: 'Chart title'
+						}
+					}
+				});
+			}
+		}
+		$(function(){
+	        $("#getData").on("submit", function(event) {
+	            event.preventDefault();
+
+	            var formData = {
+	                'initialDate': $('input[name=initialValue]').val(),
+	                'finalDate': $('input[name=finalValue]').val()
+	            };
+	            console.log(formData);
+
+	            $.ajax({
+	                url: "./ChartDataManager",
+	                type: "post",
+	                data: formData,
+	                success: function(response,ioArgs){
+						jsonData = response;
+						showGraph();
+	                }
+	            });
+	        });
+	    })
+</script>
+</head>
+<body>
+	<canvas id="chart" width="800" height="450"></canvas>
+	<form id="getData" method="POST" action="./ChartDataManager">
+		<input type="text" id="initialDate" name="initialValue" />
+		<input type="text" id="finalDate" name="finalValue"/>
+		<button type="submit" id="submitButton">Load data</button>
+	</form>
+</body>
+</html>
